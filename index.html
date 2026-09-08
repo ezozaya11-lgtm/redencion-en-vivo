@@ -309,9 +309,7 @@ async function closeDay(){
   d.days.sort((a,b)=>a.date.localeCompare(b.date));saveRoot();render();
   const ok=await saveCloudClose(c);
   if(ok) alert(selectedStore==="INVITADO"?"Cierre guardado en este dispositivo ✅":"Cierre guardado y enviado al Concentrado D15 ✅");
-  else alert("Cierre guardado en este celular ✅
-
-No logró subir al Concentrado D15 todavía. No se perdió la información.");
+  else alert("Cierre guardado en este celular ✅\\n\\nNo logró subir al Concentrado D15 todavía. No se perdió la información.");
 }
 function renderAccum(){
   const days=db().days;let t=0,l=0,a=0;days.forEach(x=>{t+=+x.tickets||0;l+=+x.loyalty||0;a+=+x.adds||0});
