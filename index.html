@@ -27,7 +27,7 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
 .controls{display:flex;gap:6px;align-items:center}.controls button{width:46px;height:46px;border:0;border-radius:14px;background:#252934;color:#fff;font-size:26px;font-weight:950}
 .controls input{width:84px;height:46px;border:1px solid #343947;border-radius:14px;background:#0d0f15;color:#fff;text-align:center;font-size:20px;font-weight:950}
 .dual{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{padding:10px}.metric.loy{border-color:#563490}.metric.add{border-color:#8c2b50}
-.name{font-size:11px;color:var(--muted);font-weight:900}.pct{font-size:34px;font-weight:950;line-height:1;margin-top:6px}
+.metric-top{display:flex;justify-content:space-between;align-items:center;gap:6px}.name{font-size:11px;color:var(--muted);font-weight:900}.status-mark{font-size:27px;line-height:1}.pct{font-size:34px;font-weight:950;line-height:1;margin-top:6px}
 .count{font-size:10px;color:var(--muted);margin-top:4px}.dev{margin-top:8px;background:#0f1117;border:1px solid #292d38;border-radius:12px;padding:8px;font-size:10px;line-height:1.3;min-height:54px}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 .addbtn{width:100%;border:0;border-radius:14px;color:white;font-weight:950;margin-top:9px;padding:15px 5px}.loy .addbtn{background:linear-gradient(135deg,#6d28d9,#9c63ff)}.add .addbtn{background:linear-gradient(135deg,#db2777,#f15cac)}
@@ -77,7 +77,7 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
   </div>
 
   <section id="dayView">
-    <div class="card notice" id="syncNotice">Los datos siguen guardándose en este dispositivo. El ranking de esta versión de prueba usa los cierres disponibles en este navegador.</div>
+    <div class="card notice" id="syncNotice">📡 Conectando con el Concentrado D15… El dispositivo conserva una copia local como respaldo.</div>
     <div class="card day-card">
       <div><span>Día que estás cargando</span><b id="dayLabel">Lunes 31 de agosto</b></div>
       <input id="workDate" type="date" min="2026-08-31" max="2026-10-04" onchange="changeDay(this.value)">
@@ -93,12 +93,12 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
 
     <div class="dual">
       <div class="card metric loy">
-        <div class="name">💜 LOYALTY</div><div class="pct" id="loyPct">0.0%</div><div class="count"><b id="loyCount">0</b> redenciones</div>
+        <div class="metric-top"><div class="name">💜 LOYALTY</div><div class="status-mark" id="loyMark">❌</div></div><div class="pct" id="loyPct">0.0%</div><div class="count"><b id="loyCount">0</b> redenciones</div>
         <div class="dev" id="loyDev"></div><button class="addbtn" onclick="addLoy()">+1 LOYALTY</button>
         <div class="mini"><button onclick="subLoy()">−1</button><button onclick="editMetric('loyalty')">Editar</button></div>
       </div>
       <div class="card metric add">
-        <div class="name">🛍️ ADICIONALES</div><div class="pct" id="addPct">0.0%</div><div class="count"><b id="addCount">0</b> unidades</div>
+        <div class="metric-top"><div class="name">🛍️ ADICIONALES</div><div class="status-mark" id="addMark">❌</div></div><div class="pct" id="addPct">0.0%</div><div class="count"><b id="addCount">0</b> unidades</div>
         <div class="dev" id="addDev"></div><button class="addbtn" onclick="addAdd()">+1 ADICIONAL</button>
         <div class="mini"><button onclick="subAdd()">−1</button><button onclick="editMetric('adds')">Editar</button></div>
       </div>
@@ -172,6 +172,12 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
 const OLD_KEY="redencion-dia-fecha-v1";
 const ROOT_KEY="redencion-d15-v2";
 const STORE_KEY="redencion-d15-selected-store";
+const SUPABASE_URL="https://swlvwqqltovvrkjhbrtix.supabase.co";
+const SUPABASE_KEY="sb_publishable_UWD5LElgGKVlD5GC6t_REw_eaL2cC0p";
+const CLOUD_TABLE="cierres_diarios";
+let cloudRows=[];
+let cloudReady=false;
+let cloudLoading=false;
 
 const stores=[
 "TM Pl Fiesta Anahuac","TM Mty Citadel","TM Mty Pz Sn Agustin","TM Se Saltillo","TM Cumbres Mty",
@@ -198,6 +204,61 @@ function need(c,t){return t>0?Math.max(0,Math.ceil(t*.10-c)):0}
 function fmtLong(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}
 function fmtShort(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"2-digit"})}
 
+function statusMark(p){return p>=10?"🏆":p>=7?"⭐":"❌"}
+function sbHeaders(extra={}){return Object.assign({"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"},extra)}
+function normalizeCloudRow(r){
+  return {
+    store:r.tienda ?? r.store ?? r.tienda_nombre ?? "",
+    date:r.fecha ?? r.date ?? "",
+    tickets:Number(r.tickets ?? 0),
+    loyalty:Number(r.loyalty ?? r.redenciones_loyalty ?? 0),
+    adds:Number(r.adicionales ?? r.adds ?? r.unidades_adicionales ?? 0)
+  };
+}
+async function loadCloud(){
+  if(cloudLoading)return;
+  cloudLoading=true;
+  try{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${CLOUD_TABLE}?select=*`,{headers:sbHeaders()});
+    if(!res.ok)throw new Error(await res.text());
+    cloudRows=(await res.json()).map(normalizeCloudRow).filter(r=>r.store&&r.date);
+    cloudReady=true;
+    syncNotice.innerHTML="🟢 <b>Concentrado D15 conectado.</b> Los cierres se comparten entre tiendas; este celular conserva respaldo local.";
+    if(!rankView.classList.contains("hidden"))renderRanking();
+    if(!conView.classList.contains("hidden"))renderConsolidated();
+  }catch(e){
+    cloudReady=false;
+    syncNotice.innerHTML="🟠 <b>Modo respaldo local.</b> No se pudo leer el Concentrado D15 en este momento. Los datos de este celular no se pierden.";
+    console.error("Supabase lectura:",e);
+  }finally{cloudLoading=false}
+}
+async function saveCloudClose(c){
+  if(selectedStore==="INVITADO")return true;
+  const base=`${SUPABASE_URL}/rest/v1/${CLOUD_TABLE}`;
+  const filter=`?tienda=eq.${encodeURIComponent(selectedStore)}&fecha=eq.${encodeURIComponent(c.date)}`;
+  const payload={tienda:selectedStore,fecha:c.date,tickets:Number(c.tickets)||0,loyalty:Number(c.loyalty)||0,adicionales:Number(c.adds)||0};
+  try{
+    let check=await fetch(base+filter+"&select=*",{headers:sbHeaders()});
+    if(!check.ok)throw new Error(await check.text());
+    const existing=await check.json();
+    let res;
+    if(existing.length){
+      res=await fetch(base+filter,{method:"PATCH",headers:sbHeaders({"Prefer":"return=minimal"}),body:JSON.stringify(payload)});
+    }else{
+      res=await fetch(base,{method:"POST",headers:sbHeaders({"Prefer":"return=minimal"}),body:JSON.stringify(payload)});
+    }
+    if(!res.ok)throw new Error(await res.text());
+    await loadCloud();
+    return true;
+  }catch(e){
+    console.error("Supabase guardado:",e);
+    return false;
+  }
+}
+function cloudInRange(from,to){
+  return cloudRows.filter(r=>r.store!=="INVITADO"&&r.date>=from&&r.date<=to);
+}
+
 function migrateLegacy(target){
   if(root.migrated)return false;
   const raw=localStorage.getItem(OLD_KEY);
@@ -222,7 +283,7 @@ function render(){
   ticketDisplay.textContent=c.tickets;ticketInput.value=c.tickets;
   loyCount.textContent=c.loyalty;addCount.textContent=c.adds;
   loyPct.textContent=lp.toFixed(1)+"%";addPct.textContent=ap.toFixed(1)+"%";
-  loyPct.className="pct "+tone(lp);addPct.className="pct "+tone(ap);
+  loyPct.className="pct "+tone(lp);addPct.className="pct "+tone(ap);loyMark.textContent=statusMark(lp);addMark.textContent=statusMark(ap);
   loyDev.innerHTML=c.tickets? (lp>=10?'<span class="good"><b>🏆 10% alcanzado</b></span>':`<span class="${tone(lp)}">Faltan <b>${need(c.loyalty,c.tickets)}</b> Loyalty para 10%</span>`):"Sin tickets todavía.";
   addDev.innerHTML=c.tickets? (ap>=10?'<span class="good"><b>🏆 10% alcanzado</b></span>':`<span class="${tone(ap)}">Faltan <b>${need(c.adds,c.tickets)}</b> adicionales para 10%</span>`):"Sin tickets todavía.";
   if(c.tickets<=0){motivationTitle.textContent="Vamos por el 10%";motivationCopy.textContent="Carga los tickets del día y comienza el reto."}
@@ -242,12 +303,15 @@ function changeDay(v){
   if((d.current.tickets||d.current.loyalty||d.current.adds)&&v!==d.current.date&&!confirm("Hay datos sin cerrar. ¿Cambiar de fecha?")){workDate.value=d.current.date;return}
   d.current={date:v,tickets:0,loyalty:0,adds:0};render()
 }
-function closeDay(){
+async function closeDay(){
   const d=db(),c=d.current;if(c.tickets<=0)return alert("Carga los tickets antes de cerrar el día.");
   const i=d.days.findIndex(x=>x.date===c.date);if(i>=0)d.days[i]={...c};else d.days.push({...c});
-  d.days.sort((a,b)=>a.date.localeCompare(b.date));
-  alert("Cierre guardado ✅");
-  render();
+  d.days.sort((a,b)=>a.date.localeCompare(b.date));saveRoot();render();
+  const ok=await saveCloudClose(c);
+  if(ok) alert(selectedStore==="INVITADO"?"Cierre guardado en este dispositivo ✅":"Cierre guardado y enviado al Concentrado D15 ✅");
+  else alert("Cierre guardado en este celular ✅
+
+No logró subir al Concentrado D15 todavía. No se perdió la información.");
 }
 function renderAccum(){
   const days=db().days;let t=0,l=0,a=0;days.forEach(x=>{t+=+x.tickets||0;l+=+x.loyalty||0;a+=+x.adds||0});
@@ -257,7 +321,7 @@ function renderAccum(){
 function showTab(x){
   dayView.classList.toggle("hidden",x!=="day");accView.classList.toggle("hidden",x!=="acc");rankView.classList.toggle("hidden",x!=="rank");conView.classList.toggle("hidden",x!=="con");
   tabDay.classList.toggle("active",x==="day");tabAcc.classList.toggle("active",x==="acc");tabRank.classList.toggle("active",x==="rank");tabCon.classList.toggle("active",x==="con");
-  if(x==="rank")renderRanking(); if(x==="con")renderConsolidated();
+  if(x==="rank"){renderRanking();loadCloud();} if(x==="con"){renderConsolidated();loadCloud();}
 }
 function setMetric(m){rankMetric=m;segLoy.classList.toggle("active",m==="loyalty");segAdd.classList.toggle("active",m==="adds");renderRanking()}
 function setScope(s){rankScope=s;["Today","Week","Month"].forEach(x=>document.getElementById("scope"+x).classList.toggle("active",s===x.toLowerCase()));renderRanking()}
@@ -269,9 +333,14 @@ function scopeDates(){
   const f=d=>d.toISOString().slice(0,10);return [f(st),f(en)];
 }
 function aggregateStore(name){
-  const d=ensureStore(name),[from,to]=scopeDates();let rows=[];
-  if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
-  d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  const [from,to]=scopeDates();let rows=[];
+  if(cloudReady){
+    rows=cloudInRange(from,to).filter(r=>r.store===name);
+  }else{
+    const d=ensureStore(name);
+    if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
+    d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  }
   let t=0,v=0;rows.forEach(x=>{t+=+x.tickets||0;v+=+(x[rankMetric]||0)});
   return {store:name,tickets:t,value:v,rate:pct(v,t)}
 }
@@ -293,9 +362,14 @@ function conDates(){
   const save=rankScope;rankScope=conScope;const d=scopeDates();rankScope=save;return d;
 }
 function conAggregate(name){
-  const d=ensureStore(name),[from,to]=conDates();let rows=[];
-  if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
-  d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  const [from,to]=conDates();let rows=[];
+  if(cloudReady){
+    rows=cloudInRange(from,to).filter(r=>r.store===name);
+  }else{
+    const d=ensureStore(name);
+    if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
+    d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  }
   let tickets=0,loyalty=0,adds=0;rows.forEach(x=>{tickets+=+x.tickets||0;loyalty+=+x.loyalty||0;adds+=+x.adds||0});
   return {store:name,tickets,loyalty,adds,lp:pct(loyalty,tickets),ap:pct(adds,tickets),active:tickets>0}
 }
@@ -336,6 +410,6 @@ function confirmStore(){
   else if(first)alert("Tienda configurada ✅");
   render();
 }
-render();
+render();loadCloud();
 </script>
 </body></html>
