@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>REDENCIÓN 10/10 · D15</title>
+<style>
+:root{
+  --bg:#08090d;--panel:#14161d;--panel2:#0f1117;--line:#2a2e39;--text:#f7f8fb;--muted:#9da3af;
+  --purple:#8b5cf6;--pink:#ec4899;--good:#31d17c;--warn:#ffbd3f;--bad:#ff5d6c;--gold:#f5c451;
+}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#08090d,#10121a);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:14px 12px 96px}
+.header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.brand h1{font-size:20px;margin:0;font-weight:950;letter-spacing:.02em}.brand p{font-size:10px;color:var(--muted);margin:3px 0 0}
+.store-pill{max-width:48%;border:1px solid #40316c;background:#171522;color:#ddd4ff;border-radius:999px;padding:8px 10px;font-weight:900;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:9px}
+.tabs button{border:1px solid #2d3140;background:#11131a;color:#aaa;border-radius:13px;padding:11px 6px;font-weight:900;font-size:11px}
+.tabs button.active{background:#211a37;color:#eee;border-color:#563490}
+.notice{padding:10px 12px;margin-bottom:9px;font-size:10px;color:#cfd2dc;line-height:1.35}
+.day-card{padding:11px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.day-card span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase}.day-card b{font-size:15px}
+.day-card input{background:#0f1117;color:white;border:1px solid #343947;border-radius:12px;padding:9px;font-weight:850;max-width:148px}
+.tickets{padding:12px;margin-bottom:9px}.tickets-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.ticket-big{font-size:42px;font-weight:950;line-height:1;margin-top:3px}
+.controls{display:flex;gap:6px;align-items:center}.controls button{width:46px;height:46px;border:0;border-radius:14px;background:#252934;color:#fff;font-size:26px;font-weight:950}
+.controls input{width:84px;height:46px;border:1px solid #343947;border-radius:14px;background:#0d0f15;color:#fff;text-align:center;font-size:20px;font-weight:950}
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{padding:10px}.metric.loy{border-color:#563490}.metric.add{border-color:#8c2b50}
+.name{font-size:11px;color:var(--muted);font-weight:900}.pct{font-size:34px;font-weight:950;line-height:1;margin-top:6px}
+.count{font-size:10px;color:var(--muted);margin-top:4px}.dev{margin-top:8px;background:#0f1117;border:1px solid #292d38;border-radius:12px;padding:8px;font-size:10px;line-height:1.3;min-height:54px}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.addbtn{width:100%;border:0;border-radius:14px;color:white;font-weight:950;margin-top:9px;padding:15px 5px}.loy .addbtn{background:linear-gradient(135deg,#6d28d9,#9c63ff)}.add .addbtn{background:linear-gradient(135deg,#db2777,#f15cac)}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}.mini button{border:0;border-radius:11px;background:#252934;color:#fff;padding:9px 4px;font-size:11px;font-weight:900}
+.motivation{margin-top:9px;padding:12px;text-align:center;border-color:#40316c}.motivation b{font-size:16px}.motivation div{font-size:10px;color:#c8ccd5;margin-top:4px}
+.bottom-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.bottom-actions button{border:0;border-radius:13px;padding:13px 8px;font-weight:950;font-size:12px}
+.accbtn{background:#171522;color:#ddd4ff;border:1px solid #3b3168!important}.closebtn{background:linear-gradient(135deg,#176f3c,#2ca65d);color:#fff}
+.hidden{display:none!important}
+
+.rank-head{padding:12px;margin-bottom:9px}.rank-head h2{font-size:18px;margin:0}.rank-head p{font-size:10px;color:var(--muted);margin:4px 0 0}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}.segment button{border:1px solid #343947;background:#11131a;color:#aaa;border-radius:12px;padding:10px;font-weight:900;font-size:11px}
+.segment button.active{background:#211a37;color:#fff;border-color:#6d4bd0}
+.scope{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}.scope button{border:1px solid #343947;background:#11131a;color:#aaa;border-radius:10px;padding:8px;font-weight:900;font-size:10px}.scope button.active{color:#fff;border-color:#555b6e}
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:9px}.pod{padding:12px 8px;text-align:center}.pod .medal{font-size:24px}.pod b{display:block;font-size:11px;margin-top:4px}.pod strong{display:block;font-size:19px;margin-top:4px}
+.table-card{overflow:hidden}.rank-row{display:grid;grid-template-columns:44px 1.4fr .7fr .7fr .7fr;gap:5px;align-items:center;padding:10px 8px;border-bottom:1px solid #252934;font-size:10px}
+.rank-row.header{color:var(--muted);font-size:8px;text-transform:uppercase;background:#0f1117}.rank-row.me{background:#211a37}.rank-row .pos{font-weight:950;text-align:center}.rank-row .store{font-weight:850}.rank-row .num{text-align:right}.rank-row .rate{text-align:right;font-weight:950}
+.empty{padding:18px;text-align:center;color:var(--muted);font-size:11px}
+
+.acc-card{padding:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.box{background:#0f1117;border:1px solid #292d38;border-radius:12px;padding:10px;text-align:center}.box span{display:block;font-size:8px;color:var(--muted);text-transform:uppercase}.box b{display:block;font-size:18px;margin-top:3px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}.result{background:#0f1117;border:1px solid #292d38;border-radius:12px;padding:10px}.result span{display:block;font-size:8px;color:var(--muted)}.result b{display:block;font-size:22px;margin-top:2px}
+.history{margin-top:9px;padding:12px}.history h3{font-size:12px;margin:0 0 8px}.hist-row{display:grid;grid-template-columns:80px 1fr 1fr;gap:6px;padding:8px;background:#0f1117;border:1px solid #292d38;border-radius:12px;margin-bottom:6px;font-size:9px}.hist-row b{font-size:11px}
+
+.overlay{position:fixed;inset:0;background:rgba(5,6,9,.98);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{width:min(100%,560px);background:#14161d;border:1px solid #343947;border-radius:22px;padding:16px}.modal h2{margin:0;font-size:20px}.modal p{font-size:11px;color:var(--muted);line-height:1.45}
+.modal select{width:100%;background:#0f1117;color:#fff;border:1px solid #343947;border-radius:13px;padding:12px;margin-top:8px}
+.modal button{width:100%;border:0;border-radius:13px;padding:13px;font-weight:950;margin-top:9px;background:linear-gradient(135deg,#6d28d9,#ec4899);color:white}
+.modal .secondary{background:#252934}.migration{background:#10131a;border:1px solid #2c3340;border-radius:14px;padding:10px;margin-top:10px;font-size:10px;color:#c8ccd5}
+
+@media(max-width:520px){
+  .dual{grid-template-columns:1fr 1fr}.pct{font-size:28px}.ticket-big{font-size:38px}.rank-row{grid-template-columns:38px 1.2fr .65fr .65fr .72fr;font-size:9px}
+  .podium{grid-template-columns:1fr}.pod{display:grid;grid-template-columns:auto 1fr auto;align-items:center;text-align:left;gap:8px}.pod b,.pod strong{margin:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="brand"><h1>REDENCIÓN 10/10</h1><p>LOYALTY + ADICIONALES · DISTRITO 15</p></div>
+    <button class="store-pill" id="storePill" onclick="openStoreModal()">Seleccionar tienda</button>
+  </div>
+
+  <div class="tabs">
+    <button id="tabDay" class="active" onclick="showTab('day')">🎯 HOY</button>
+    <button id="tabAcc" onclick="showTab('acc')">📊 ACUMULADO</button>
+    <button id="tabRank" onclick="showTab('rank')">🏆 RANKING</button>
+    <button id="tabCon" onclick="showTab('con')">📡 D15</button>
+  </div>
+
+  <section id="dayView">
+    <div class="card notice" id="syncNotice">Los datos siguen guardándose en este dispositivo. El ranking de esta versión de prueba usa los cierres disponibles en este navegador.</div>
+    <div class="card day-card">
+      <div><span>Día que estás cargando</span><b id="dayLabel">Lunes 31 de agosto</b></div>
+      <input id="workDate" type="date" min="2026-08-31" max="2026-10-04" onchange="changeDay(this.value)">
+    </div>
+    <div class="card tickets">
+      <div class="tickets-row">
+        <div><div class="label">Tickets acumulados del día</div><div class="ticket-big" id="ticketDisplay">0</div></div>
+        <div class="controls">
+          <button onclick="changeTickets(-1)">−</button><input id="ticketInput" type="number" min="0" inputmode="numeric" value="0" oninput="setTickets(this.value)"><button onclick="changeTickets(1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dual">
+      <div class="card metric loy">
+        <div class="name">💜 LOYALTY</div><div class="pct" id="loyPct">0.0%</div><div class="count"><b id="loyCount">0</b> redenciones</div>
+        <div class="dev" id="loyDev"></div><button class="addbtn" onclick="addLoy()">+1 LOYALTY</button>
+        <div class="mini"><button onclick="subLoy()">−1</button><button onclick="editMetric('loyalty')">Editar</button></div>
+      </div>
+      <div class="card metric add">
+        <div class="name">🛍️ ADICIONALES</div><div class="pct" id="addPct">0.0%</div><div class="count"><b id="addCount">0</b> unidades</div>
+        <div class="dev" id="addDev"></div><button class="addbtn" onclick="addAdd()">+1 ADICIONAL</button>
+        <div class="mini"><button onclick="subAdd()">−1</button><button onclick="editMetric('adds')">Editar</button></div>
+      </div>
+    </div>
+
+    <div class="card motivation"><b id="motivationTitle">Vamos por el 10%</b><div id="motivationCopy">Carga los tickets del día y comienza el reto.</div></div>
+    <div class="bottom-actions"><button class="accbtn" onclick="showTab('rank')">🏆 Ver ranking</button><button class="closebtn" onclick="closeDay()">Cerrar día</button></div>
+  </section>
+
+  <section id="accView" class="hidden">
+    <div class="card acc-card">
+      <div class="label">Periodo 31/08/26 al 04/10/26</div>
+      <div class="grid3" style="margin-top:8px">
+        <div class="box"><span>Tickets</span><b id="accTickets">0</b></div><div class="box"><span>Loyalty</span><b id="accLoy">0</b></div><div class="box"><span>Adicionales</span><b id="accAdd">0</b></div>
+      </div>
+      <div class="grid2"><div class="result"><span>LOYALTY ACUMULADO</span><b id="accLoyPct">0.0%</b></div><div class="result"><span>ADICIONALES ACUMULADO</span><b id="accAddPct">0.0%</b></div></div>
+    </div>
+    <div class="card history"><h3>Días cerrados</h3><div id="historyList"></div></div>
+  </section>
+
+  <section id="rankView" class="hidden">
+    <div class="card rank-head">
+      <h2>🏆 RANKING D15</h2><p>La posición se define por efectividad: indicador ÷ tickets. Así todas las tiendas compiten con la misma oportunidad.</p>
+      <div class="segment"><button id="segLoy" class="active" onclick="setMetric('loyalty')">LOYALTY</button><button id="segAdd" onclick="setMetric('adds')">ADICIONALES</button></div>
+      <div class="scope"><button id="scopeToday" class="active" onclick="setScope('today')">HOY</button><button id="scopeWeek" onclick="setScope('week')">SEMANA</button><button id="scopeMonth" onclick="setScope('month')">MES</button></div>
+    </div>
+    <div class="podium" id="podium"></div>
+    <div class="card table-card">
+      <div class="rank-row header"><div>Pos.</div><div>Tienda</div><div class="num">Tickets</div><div class="num" id="metricCol">Loyalty</div><div class="num">%</div></div>
+      <div id="rankingRows"></div>
+    </div>
+  </section>
+
+  <section id="conView" class="hidden">
+    <div class="card rank-head">
+      <h2>📡 CONSOLIDADO D15</h2>
+      <p>Lectura rápida del uso y resultados de las 25 tiendas oficiales.</p>
+      <div class="scope"><button id="conToday" class="active" onclick="setConScope('today')">HOY</button><button id="conWeek" onclick="setConScope('week')">SEMANA</button><button id="conMonth" onclick="setConScope('month')">MES</button></div>
+    </div>
+    <div class="card acc-card" style="margin-bottom:9px">
+      <div class="grid3">
+        <div class="box"><span>Reportando</span><b id="conReporting">0/25</b></div>
+        <div class="box"><span>Loyalty D15</span><b id="conLoyPct">0.0%</b></div>
+        <div class="box"><span>Adicionales D15</span><b id="conAddPct">0.0%</b></div>
+      </div>
+    </div>
+    <div class="card history" id="missingCard">
+      <h3 id="missingTitle">⚠️ SIN REPORTE HOY</h3>
+      <div id="missingList"></div>
+    </div>
+    <div class="card table-card" style="margin-top:9px">
+      <div class="rank-row header" style="grid-template-columns:1.5fr .7fr .7fr .7fr .7fr">
+        <div>Tienda</div><div class="num">Tickets</div><div class="num">Loy %</div><div class="num">Adic %</div><div class="num">Estado</div>
+      </div>
+      <div id="conRows"></div>
+    </div>
+  </section>
+</div>
+
+<div class="overlay hidden" id="storeOverlay">
+  <div class="modal">
+    <h2>Selecciona tu tienda</h2>
+    <p>La primera selección asignará a esa tienda la información que ya estaba guardada en este celular. Después el equipo puede cambiar de tienda desde la parte superior.</p>
+    <select id="storeSelect"></select>
+    <div class="migration" id="migrationInfo">Si este dispositivo ya tiene cierres de la versión anterior, se conservarán y se migrarán a la tienda seleccionada.</div>
+    <button onclick="confirmStore()">Continuar</button><button class="secondary" onclick="closeStoreModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+const OLD_KEY="redencion-dia-fecha-v1";
+const ROOT_KEY="redencion-d15-v2";
+const STORE_KEY="redencion-d15-selected-store";
+
+const stores=[
+"TM Pl Fiesta Anahuac","TM Mty Citadel","TM Mty Pz Sn Agustin","TM Se Saltillo","TM Cumbres Mty",
+"TM Se La Fe","TM Mty Cn 2","TM D Rio Reynosa","TM Mty Valle Ote","TM Se Catarina",
+"TM Patio Lincoln","TM Esfera Mty","TM Gl Mty","TM Sendero Sur Saltillo","TM Se Esc Mty",
+"TM Se Periferico Reynosa","TM Se Apodaca","TM Gl Saltillo","TM RI Reynosa","TM Gran Patio Monterrey",
+"TM Patio Matamoros","TM Sun Mall Mty","IS Pl Fa Anahuac","IS Gl Mty","TM Pa La Fe Mty","INVITADO"
+];
+
+let selectedStore=localStorage.getItem(STORE_KEY)||"";
+let root=loadRoot();
+let rankMetric="loyalty", rankScope="today", conScope="today";
+
+function loadRoot(){
+  try{return JSON.parse(localStorage.getItem(ROOT_KEY))||{stores:{},migrated:false}}catch(e){return{stores:{},migrated:false}}
+}
+function saveRoot(){localStorage.setItem(ROOT_KEY,JSON.stringify(root))}
+function blankDB(){return{current:{date:"2026-08-31",tickets:0,loyalty:0,adds:0},days:[]}}
+function ensureStore(name){if(!root.stores[name])root.stores[name]=blankDB();return root.stores[name]}
+function db(){return ensureStore(selectedStore||"INVITADO")}
+function pct(c,t){return t>0?c/t*100:0}
+function tone(p){return p>=10?"good":p>=7?"warn":"bad"}
+function need(c,t){return t>0?Math.max(0,Math.ceil(t*.10-c)):0}
+function fmtLong(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long"})}
+function fmtShort(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"2-digit"})}
+
+function migrateLegacy(target){
+  if(root.migrated)return false;
+  const raw=localStorage.getItem(OLD_KEY);
+  if(!raw){root.migrated=true;saveRoot();return false}
+  try{
+    const old=JSON.parse(raw);
+    if(old && old.current && Array.isArray(old.days)){
+      root.stores[target]=old;
+      root.migrated=true;
+      saveRoot();
+      return true;
+    }
+  }catch(e){}
+  root.migrated=true;saveRoot();return false;
+}
+
+function render(){
+  if(!selectedStore)return openStoreModal(true);
+  storePill.textContent=selectedStore==="INVITADO"?"👤 INVITADO":"🏬 "+selectedStore;
+  const c=db().current,lp=pct(c.loyalty,c.tickets),ap=pct(c.adds,c.tickets);
+  workDate.value=c.date;dayLabel.textContent=fmtLong(c.date);
+  ticketDisplay.textContent=c.tickets;ticketInput.value=c.tickets;
+  loyCount.textContent=c.loyalty;addCount.textContent=c.adds;
+  loyPct.textContent=lp.toFixed(1)+"%";addPct.textContent=ap.toFixed(1)+"%";
+  loyPct.className="pct "+tone(lp);addPct.className="pct "+tone(ap);
+  loyDev.innerHTML=c.tickets? (lp>=10?'<span class="good"><b>🏆 10% alcanzado</b></span>':`<span class="${tone(lp)}">Faltan <b>${need(c.loyalty,c.tickets)}</b> Loyalty para 10%</span>`):"Sin tickets todavía.";
+  addDev.innerHTML=c.tickets? (ap>=10?'<span class="good"><b>🏆 10% alcanzado</b></span>':`<span class="${tone(ap)}">Faltan <b>${need(c.adds,c.tickets)}</b> adicionales para 10%</span>`):"Sin tickets todavía.";
+  if(c.tickets<=0){motivationTitle.textContent="Vamos por el 10%";motivationCopy.textContent="Carga los tickets del día y comienza el reto."}
+  else if(lp>=10&&ap>=10){motivationTitle.textContent="🏆 DOBLE 10 CONSEGUIDO";motivationCopy.textContent="Ambos indicadores están en meta. Ahora toca defenderlos hasta el cierre."}
+  else if(lp>=10){motivationTitle.textContent="💜 Loyalty listo";motivationCopy.textContent=`Faltan ${need(c.adds,c.tickets)} adicionales para completar el Doble 10.`}
+  else if(ap>=10){motivationTitle.textContent="🛍️ Adicionales listo";motivationCopy.textContent=`Faltan ${need(c.loyalty,c.tickets)} Loyalty para completar el Doble 10.`}
+  else{motivationTitle.textContent="🔥 El próximo objetivo está claro";motivationCopy.textContent=`Faltan ${need(c.loyalty,c.tickets)} Loyalty y ${need(c.adds,c.tickets)} adicionales para llegar al 10/10.`}
+  saveRoot();renderAccum();renderRanking();renderConsolidated();
+}
+function setTickets(v){db().current.tickets=Math.max(0,Number(v)||0);render()}
+function changeTickets(n){db().current.tickets=Math.max(0,db().current.tickets+n);render()}
+function addLoy(){db().current.loyalty++;render()} function subLoy(){db().current.loyalty=Math.max(0,db().current.loyalty-1);render()}
+function addAdd(){db().current.adds++;render()} function subAdd(){db().current.adds=Math.max(0,db().current.adds-1);render()}
+function editMetric(k){const n=prompt("Nuevo valor:",db().current[k]);if(n!==null){db().current[k]=Math.max(0,Number(n)||0);render()}}
+function changeDay(v){
+  if(!v)return; const d=db(); if(d.days.some(x=>x.date===v)){alert("Ese día ya está cerrado.");workDate.value=d.current.date;return}
+  if((d.current.tickets||d.current.loyalty||d.current.adds)&&v!==d.current.date&&!confirm("Hay datos sin cerrar. ¿Cambiar de fecha?")){workDate.value=d.current.date;return}
+  d.current={date:v,tickets:0,loyalty:0,adds:0};render()
+}
+function closeDay(){
+  const d=db(),c=d.current;if(c.tickets<=0)return alert("Carga los tickets antes de cerrar el día.");
+  const i=d.days.findIndex(x=>x.date===c.date);if(i>=0)d.days[i]={...c};else d.days.push({...c});
+  d.days.sort((a,b)=>a.date.localeCompare(b.date));
+  alert("Cierre guardado ✅");
+  render();
+}
+function renderAccum(){
+  const days=db().days;let t=0,l=0,a=0;days.forEach(x=>{t+=+x.tickets||0;l+=+x.loyalty||0;a+=+x.adds||0});
+  accTickets.textContent=t;accLoy.textContent=l;accAdd.textContent=a;accLoyPct.textContent=pct(l,t).toFixed(1)+"%";accAddPct.textContent=pct(a,t).toFixed(1)+"%";
+  historyList.innerHTML=days.length?[...days].reverse().map(x=>`<div class="hist-row"><b>${fmtShort(x.date)}</b><span>L: <b>${pct(x.loyalty,x.tickets).toFixed(1)}%</b></span><span>A: <b>${pct(x.adds,x.tickets).toFixed(1)}%</b></span></div>`).join(""):'<div class="empty">Todavía no hay cierres.</div>';
+}
+function showTab(x){
+  dayView.classList.toggle("hidden",x!=="day");accView.classList.toggle("hidden",x!=="acc");rankView.classList.toggle("hidden",x!=="rank");conView.classList.toggle("hidden",x!=="con");
+  tabDay.classList.toggle("active",x==="day");tabAcc.classList.toggle("active",x==="acc");tabRank.classList.toggle("active",x==="rank");tabCon.classList.toggle("active",x==="con");
+  if(x==="rank")renderRanking(); if(x==="con")renderConsolidated();
+}
+function setMetric(m){rankMetric=m;segLoy.classList.toggle("active",m==="loyalty");segAdd.classList.toggle("active",m==="adds");renderRanking()}
+function setScope(s){rankScope=s;["Today","Week","Month"].forEach(x=>document.getElementById("scope"+x).classList.toggle("active",s===x.toLowerCase()));renderRanking()}
+function scopeDates(){
+  const cur=db().current.date||"2026-09-07"; const dt=new Date(cur+"T12:00:00");
+  if(rankScope==="today")return [cur,cur];
+  if(rankScope==="month")return ["2026-08-31","2026-10-04"];
+  const day=(dt.getDay()+6)%7;const st=new Date(dt);st.setDate(dt.getDate()-day);const en=new Date(st);en.setDate(st.getDate()+6);
+  const f=d=>d.toISOString().slice(0,10);return [f(st),f(en)];
+}
+function aggregateStore(name){
+  const d=ensureStore(name),[from,to]=scopeDates();let rows=[];
+  if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
+  d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  let t=0,v=0;rows.forEach(x=>{t+=+x.tickets||0;v+=+(x[rankMetric]||0)});
+  return {store:name,tickets:t,value:v,rate:pct(v,t)}
+}
+function renderRanking(){
+  metricCol.textContent=rankMetric==="loyalty"?"Loyalty":"Adicionales";
+  let rows=stores.filter(s=>s!=="INVITADO").map(aggregateStore).filter(x=>x.tickets>0);
+  rows.sort((a,b)=>b.rate-a.rate||b.value-a.value||a.store.localeCompare(b.store));
+  const medals=["🥇","🥈","🥉"];
+  podium.innerHTML=rows.slice(0,3).map((r,i)=>`<div class="card pod"><div class="medal">${medals[i]}</div><b>${r.store}</b><strong>${r.rate.toFixed(1)}%</strong></div>`).join("")||'<div class="card empty" style="grid-column:1/-1">Aún no hay tiendas con cierres para este periodo.</div>';
+  rankingRows.innerHTML=rows.length?rows.map((r,i)=>`<div class="rank-row ${r.store===selectedStore?"me":""}"><div class="pos">${i+1}</div><div class="store">${r.store}</div><div class="num">${r.tickets}</div><div class="num">${r.value}</div><div class="rate ${tone(r.rate)}">${r.rate.toFixed(1)}%</div></div>`).join(""):'<div class="empty">Todavía no hay datos suficientes para crear posiciones.</div>';
+}
+
+function setConScope(s){
+  conScope=s;
+  ["Today","Week","Month"].forEach(x=>document.getElementById("con"+x).classList.toggle("active",s===x.toLowerCase()));
+  renderConsolidated();
+}
+function conDates(){
+  const save=rankScope;rankScope=conScope;const d=scopeDates();rankScope=save;return d;
+}
+function conAggregate(name){
+  const d=ensureStore(name),[from,to]=conDates();let rows=[];
+  if(d.current.date>=from&&d.current.date<=to&&(d.current.tickets||d.current.loyalty||d.current.adds))rows.push(d.current);
+  d.days.forEach(x=>{if(x.date>=from&&x.date<=to&&!rows.some(r=>r.date===x.date))rows.push(x)});
+  let tickets=0,loyalty=0,adds=0;rows.forEach(x=>{tickets+=+x.tickets||0;loyalty+=+x.loyalty||0;adds+=+x.adds||0});
+  return {store:name,tickets,loyalty,adds,lp:pct(loyalty,tickets),ap:pct(adds,tickets),active:tickets>0}
+}
+function renderConsolidated(){
+  const official=stores.filter(s=>s!=="INVITADO"), rows=official.map(conAggregate);
+  const active=rows.filter(r=>r.active), missing=rows.filter(r=>!r.active);
+  let t=0,l=0,a=0;active.forEach(r=>{t+=r.tickets;l+=r.loyalty;a+=r.adds});
+  conReporting.textContent=active.length+"/25";conLoyPct.textContent=pct(l,t).toFixed(1)+"%";conAddPct.textContent=pct(a,t).toFixed(1)+"%";
+  const period=conScope==="today"?"HOY":conScope==="week"?"EN LA SEMANA":"EN EL MES";
+  if(missing.length){
+    missingTitle.textContent=`⚠️ SIN REPORTE ${period} · ${missing.length}`;
+    missingList.innerHTML=missing.map(r=>`<div style="padding:9px 2px;border-bottom:1px solid #292d38;font-size:12px;font-weight:900;white-space:normal">${r.store}</div>`).join("")+
+    `<div style="margin-top:10px;font-size:11px;color:#c8ccd5"><b>${active.length} de 25</b> tiendas han reportado.</div>`;
+  } else {
+    missingTitle.textContent="✅ DISTRITO COMPLETO";
+    missingList.innerHTML='<div style="padding:10px 0;font-size:13px;font-weight:900">25/25 tiendas reportando 🎯</div>';
+  }
+  const sorted=[...rows].sort((a,b)=>(b.active-a.active)||Math.min(b.lp,b.ap)-Math.min(a.lp,a.ap)||a.store.localeCompare(b.store));
+  conRows.innerHTML=sorted.map(r=>{
+    const state=!r.active?"⚪ Sin reporte":(r.lp>=10&&r.ap>=10?"🏆 10/10":(r.lp>=7&&r.ap>=7?"⭐ En objetivo":"❌ Atención"));
+    return `<div class="rank-row ${r.store===selectedStore?"me":""}" style="grid-template-columns:1.5fr .7fr .7fr .7fr .7fr">
+      <div class="store" style="white-space:normal;overflow:visible">${r.store}</div><div class="num">${r.active?r.tickets:"—"}</div>
+      <div class="num ${r.active?tone(r.lp):""}">${r.active?r.lp.toFixed(1)+"%":"—"}</div>
+      <div class="num ${r.active?tone(r.ap):""}">${r.active?r.ap.toFixed(1)+"%":"—"}</div>
+      <div class="num" style="white-space:normal">${state}</div></div>`;
+  }).join("");
+}
+
+function openStoreModal(force=false){
+  storeSelect.innerHTML='<option value="">Selecciona...</option>'+stores.map(s=>`<option ${s===selectedStore?"selected":""}>${s}</option>`).join("");
+  storeOverlay.classList.remove("hidden"); if(force)storeOverlay.querySelector(".secondary").classList.add("hidden");else storeOverlay.querySelector(".secondary").classList.remove("hidden");
+}
+function closeStoreModal(){if(selectedStore)storeOverlay.classList.add("hidden")}
+function confirmStore(){
+  const s=storeSelect.value;if(!s)return alert("Selecciona una tienda.");
+  const first=!selectedStore;selectedStore=s;localStorage.setItem(STORE_KEY,s);const migrated=migrateLegacy(s);ensureStore(s);saveRoot();storeOverlay.classList.add("hidden");
+  if(migrated)alert("Información anterior recuperada y asignada a "+s+" ✅");
+  else if(first)alert("Tienda configurada ✅");
+  render();
+}
+render();
+</script>
+</body></html>
