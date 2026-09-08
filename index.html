@@ -205,7 +205,7 @@ function fmtLong(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{w
 function fmtShort(s){return new Date(s+"T12:00:00").toLocaleDateString("es-MX",{day:"2-digit",month:"2-digit"})}
 
 function statusMark(p){return p>=10?"🏆":p>=7?"⭐":"❌"}
-function sbHeaders(extra={}){return Object.assign({"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"},extra)}
+function sbHeaders(extra={}){return Object.assign({"apikey":SUPABASE_KEY,"Content-Type":"application/json"},extra)}
 function normalizeCloudRow(r){
   return {
     store:r.tienda ?? r.store ?? r.tienda_nombre ?? "",
