@@ -54,7 +54,7 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
 .modal{width:min(100%,560px);background:#14161d;border:1px solid #343947;border-radius:22px;padding:16px}.modal h2{margin:0;font-size:20px}.modal p{font-size:11px;color:var(--muted);line-height:1.45}
 .modal select{width:100%;background:#0f1117;color:#fff;border:1px solid #343947;border-radius:13px;padding:12px;margin-top:8px}
 .modal button{width:100%;border:0;border-radius:13px;padding:13px;font-weight:950;margin-top:9px;background:linear-gradient(135deg,#6d28d9,#ec4899);color:white}
-.modal .secondary{background:#252934}.migration{background:#10131a;border:1px solid #2c3340;border-radius:14px;padding:10px;margin-top:10px;font-size:10px;color:#c8ccd5}
+.modal .secondary{background:#252934}.result-modal{text-align:center}.result-modal .result-badge{font-size:44px;margin:4px 0 2px}.result-modal .result-date{color:var(--muted);font-size:12px;margin-bottom:12px}.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.result-box{background:#0f1117;border:1px solid #303543;border-radius:16px;padding:12px 6px}.result-box span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}.result-box b{display:block;font-size:23px;margin-top:5px}.result-message{background:#10131a;border:1px solid #2c3340;border-radius:15px;padding:12px;font-weight:800;margin:10px 0}.migration{background:#10131a;border:1px solid #2c3340;border-radius:14px;padding:10px;margin-top:10px;font-size:10px;color:#c8ccd5}
 
 @media(max-width:520px){
   .dual{grid-template-columns:1fr 1fr}.pct{font-size:28px}.ticket-big{font-size:38px}.rank-row{grid-template-columns:38px 1.2fr .65fr .65fr .72fr;font-size:9px}
@@ -156,6 +156,22 @@ button,input,select{font:inherit}.app{width:min(100%,820px);margin:auto;padding:
       <div id="conRows"></div>
     </div>
   </section>
+</div>
+
+<div class="overlay hidden" id="resultOverlay">
+  <div class="modal result-modal">
+    <div class="result-badge" id="resultBadge">🏁</div>
+    <h2>RESULTADOS DEL DÍA</h2>
+    <div class="result-date" id="resultDate"></div>
+    <div class="result-grid">
+      <div class="result-box"><span>Tickets</span><b id="resultTickets">0</b></div>
+      <div class="result-box"><span>Loyalty</span><b id="resultLoy">0.0%</b></div>
+      <div class="result-box"><span>Adicionales</span><b id="resultAdd">0.0%</b></div>
+    </div>
+    <div class="result-message" id="resultMessage"></div>
+    <button onclick="saveDayFromSummary()">Guardar día</button>
+    <button class="secondary" onclick="closeResultSummary()">Seguir editando</button>
+  </div>
 </div>
 
 <div class="overlay hidden" id="storeOverlay">
@@ -304,12 +320,29 @@ function changeDay(v){
   d.current={date:v,tickets:0,loyalty:0,adds:0};render()
 }
 async function closeDay(){
-  const d=db(),c=d.current;if(c.tickets<=0)return alert("Carga los tickets antes de cerrar el día.");
+  const c=db().current;
+  if(c.tickets<=0)return alert("Carga los tickets antes de cerrar el día.");
+  const lp=pct(c.loyalty,c.tickets),ap=pct(c.adds,c.tickets);
+  resultDate.textContent=`${selectedStore} · ${fmtLong(c.date)}`;
+  resultTickets.textContent=c.tickets;
+  resultLoy.textContent=lp.toFixed(1)+"%";
+  resultAdd.textContent=ap.toFixed(1)+"%";
+  if(lp>=10&&ap>=10){resultBadge.textContent="🏆";resultMessage.textContent="DOBLE 10 CONSEGUIDO · Día completado con ambos indicadores en meta."}
+  else if(lp>=10){resultBadge.textContent="💜";resultMessage.textContent="Loyalty en meta. Adicionales cerró en "+ap.toFixed(1)+"%."}
+  else if(ap>=10){resultBadge.textContent="🛍️";resultMessage.textContent="Adicionales en meta. Loyalty cerró en "+lp.toFixed(1)+"%."}
+  else{resultBadge.textContent="📊";resultMessage.textContent="Cierre del día listo para guardar."}
+  resultOverlay.classList.remove("hidden");
+}
+function closeResultSummary(){resultOverlay.classList.add("hidden")}
+async function saveDayFromSummary(){
+  const d=db(),c={...d.current};
   const i=d.days.findIndex(x=>x.date===c.date);if(i>=0)d.days[i]={...c};else d.days.push({...c});
-  d.days.sort((a,b)=>a.date.localeCompare(b.date));saveRoot();render();
+  d.days.sort((a,b)=>a.date.localeCompare(b.date));saveRoot();
   const ok=await saveCloudClose(c);
+  resultOverlay.classList.add("hidden");
+  render();
   if(ok) alert(selectedStore==="INVITADO"?"Cierre guardado en este dispositivo ✅":"Cierre guardado y enviado al Concentrado D15 ✅");
-  else alert("Cierre guardado en este celular ✅\\n\\nNo logró subir al Concentrado D15 todavía. No se perdió la información.");
+  else alert("Cierre guardado en este celular ✅\n\nNo logró subir al Concentrado D15 todavía. No se perdió la información.");
 }
 function renderAccum(){
   const days=db().days;let t=0,l=0,a=0;days.forEach(x=>{t+=+x.tickets||0;l+=+x.loyalty||0;a+=+x.adds||0});
